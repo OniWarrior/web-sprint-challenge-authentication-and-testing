@@ -2,10 +2,10 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { JWT_SECRET} = require('../secrets/index')
-const {checkUserNameExists, validateUserNameAndPassword,checkUsernameFree} = require('../middleware/validation')
+const {checkUserNameExists, checkForMissingUserNameAndPassword,checkUsernameFree} = require('../middleware/validation')
 const User = require('./auth-model')
 
-router.post('/register',validateUserNameAndPassword,checkUsernameFree, (req, res,next) => {
+router.post('/register',checkForMissingUserNameAndPassword,checkUsernameFree, (req, res,next) => {
   //res.end('implement register, please!');
   /*
     IMPLEMENT
@@ -49,7 +49,7 @@ router.post('/register',validateUserNameAndPassword,checkUsernameFree, (req, res
 
 });
 
-router.post('/login',checkUserNameExists,validateUserNameAndPassword, (req, res,next) => {
+router.post('/login',checkUserNameExists,checkForMissingUserNameAndPassword, (req, res,next) => {
  // res.end('implement login, please!');
   /*
     IMPLEMENT
@@ -75,16 +75,18 @@ router.post('/login',checkUserNameExists,validateUserNameAndPassword, (req, res,
       the response body should include a string exactly as follows: "invalid credentials".
   */
  let {username,password} = req.body
- User.findBy({username,password})
- .then(([user])=>{
-   if(user && bcrypt.compareSync(password,user.password)){
+ User.findByUserName(username)
+ .then(([user])=>{  
+   
+   if(user && bcrypt.compare(password,user.password)){
      const token = makeToken(user)
      res.status(200).json({
-      message: ` ${user.username} is back!`,
+      message: `welcome back ${user.username} !`,
       token
     });
    }else {
-    res.status(401).json({ message: 'Invalid Credentials' });
+    
+    res.status(401).json("invalid credentials");
   }
  })
  .catch(err=>{
@@ -99,7 +101,7 @@ router.post('/login',checkUserNameExists,validateUserNameAndPassword, (req, res,
 
 function makeToken(user){
   const payload={
-    subject:user.id,
+    id:user.id,
     username:user.username,
     password:user.password
   }

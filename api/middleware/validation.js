@@ -1,7 +1,8 @@
 const User = require("../auth/auth-model")
 
-function checkUsernameFree(req,res,next) {
-    User.findBy({username:req.body.username})
+const checkUsernameFree=(req,res,next) =>{
+    
+    User.findByUserName(req.body.username)
     .then(rows=>{
       if(!rows.length){      
         next()
@@ -15,16 +16,18 @@ function checkUsernameFree(req,res,next) {
     })  
   }
   
+
+
 const checkUserNameExists = (req, res, next) => {
     
-   User.findBy({username:req.body.username})
+   User.findByUserName(req.body.username)
    .then(rows=>{
      if(rows.length){
        req.userData=rows[0]
        next()
      }
      else{
-       res.status(401).json("invalid credentials")
+       res.status(401).json("Invalid credentials")
      }
   
    })
@@ -36,7 +39,7 @@ const checkUserNameExists = (req, res, next) => {
   
 
   // check for missing username and or password
-  const validateUserNameAndPassword= async(req,res,next)=>{
+  const checkForMissingUserNameAndPassword= async(req,res,next)=>{
     try{
         const {username,password} = req.body
         if(!username ||  username==="" ||
@@ -52,9 +55,12 @@ const checkUserNameExists = (req, res, next) => {
       }
   }
 
+ 
+
 
   module.exports={
       checkUserNameExists,
-      validateUserNameAndPassword,
+      checkForMissingUserNameAndPassword,
       checkUsernameFree
+      
   }

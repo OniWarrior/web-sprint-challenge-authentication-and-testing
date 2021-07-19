@@ -12,14 +12,23 @@ function insert(user){
            .then(([id])=>findById(id))
 }
 
-function findBy(filter){
+function findByUserName(username){
     return db('users')
-           .where(filter)
-           .first()
+           .where("username",username)
+           
+}
+
+
+
+function findByPassword(password){
+    return db('users')
+           .where("password",password)
 }
 
 module.exports={
     findById,
-    findBy,
+    findByUserName,
+    findByPassword,
     insert
+    
 }
